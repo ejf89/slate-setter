@@ -30,8 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+!.env.example
+
+# sqlite — intentionally committed so Vercel can read it at runtime
+# data/slate.db is NOT ignored
 
 # vercel
 .vercel
