@@ -31,7 +31,7 @@ const TRACKED_STUDIOS: Record<string, string> = {
 };
 
 export function GET() {
-  const CACHE_KEY = "catalog-v2";
+  const CACHE_KEY = "catalog-v3";
   const cached = getCached<object>(CACHE_KEY);
   if (cached) return NextResponse.json(cached);
 
@@ -49,7 +49,7 @@ export function GET() {
     WHERE f.studio IN (${placeholders})
     GROUP BY f.id
     ORDER BY wp.gross DESC
-    LIMIT 400
+    LIMIT 1500
   `).all(...studioList) as Array<{
     id: number;
     title: string;

@@ -16,6 +16,7 @@ interface FilmEntry {
   weeksInRelease: number;
   threatScore: number;
   isThreat: boolean;
+  isAnnounced?: boolean;
 }
 
 interface Weekend {
@@ -755,6 +756,7 @@ function WeekendRow({
               <span className="text-red-500 text-[8px] shrink-0">▲</span>
               <span className="font-[family-name:var(--font-newsreader)] text-white text-xs truncate">{f.title}</span>
               <span className="text-neutral-700 text-[9px] shrink-0">W{f.weeksInRelease}</span>
+              {f.isAnnounced && <span className="text-purple-400 text-[8px] shrink-0" title="Announced wide release (The Numbers)">●</span>}
             </span>
           ))}
           {threats.length === 0 &&
@@ -1081,10 +1083,16 @@ function WeekendBreakdown({
               {threats.map((f) => (
                 <div key={`${f.filmId}-${f.weeksInRelease}`} className="flex justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="font-[family-name:var(--font-newsreader)] text-white text-xs leading-tight truncate">{f.title}</div>
+                    <div className="font-[family-name:var(--font-newsreader)] text-white text-xs leading-tight truncate flex items-baseline gap-1.5">
+                      <span>{f.title}</span>
+                      {f.isAnnounced && (
+                        <span className="text-[8px] uppercase tracking-wider px-1 py-px rounded bg-purple-500/15 border border-purple-500/30 text-purple-400 shrink-0" title="Announced 2026 wide release from The Numbers">
+                          announced
+                        </span>
+                      )}
+                    </div>
                     <div className="text-neutral-600 text-[10px]">
-                      {isProjection ? `${proxyYear} · ` : `Wk ${f.weeksInRelease} · `}
-                      {f.genres.slice(0, 2).join(", ")}
+                      Wk {f.weeksInRelease} · {f.genres.slice(0, 2).join(", ") || "—"}
                     </div>
                   </div>
                   <div className="text-red-400 text-xs font-semibold shrink-0">
@@ -1112,7 +1120,12 @@ function WeekendBreakdown({
                 className={`flex justify-between gap-2 ${f.weeksInRelease > 1 ? "opacity-40" : ""}`}
               >
                 <div className="min-w-0">
-                  <div className="font-[family-name:var(--font-newsreader)] text-neutral-300 text-xs truncate">{f.title}</div>
+                  <div className="font-[family-name:var(--font-newsreader)] text-neutral-300 text-xs truncate flex items-baseline gap-1.5">
+                    <span>{f.title}</span>
+                    {f.isAnnounced && (
+                      <span className="text-[8px] text-purple-400 shrink-0" title="Announced 2026 wide release">●</span>
+                    )}
+                  </div>
                   <div className="text-neutral-700 text-[9px]">Wk {f.weeksInRelease} · {f.genres[0] ?? "—"}</div>
                 </div>
                 <div className="text-neutral-600 text-[10px] shrink-0">{formatM(f.gross)}</div>
@@ -1355,8 +1368,8 @@ const GENRE_OPTIONS = [
   "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western",
 ];
 
-const CATALOG_GENRE_FILTERS = ["Horror", "Drama", "Thriller", "Comedy", "Action", "Sci-Fi", "Romance", "War", "Documentary", "Fantasy"];
-const CATALOG_STUDIO_FILTERS = ["A24", "Universal", "Warner Bros.", "Lionsgate", "Sony", "Paramount", "Disney", "Focus Features", "Neon", "Searchlight", "Bleecker Street"];
+const CATALOG_GENRE_FILTERS = ["Horror", "Drama", "Thriller", "Comedy", "Action", "Sci-Fi", "Romance", "Adventure", "Animation", "Crime", "Fantasy", "Mystery", "Family", "Documentary", "Biography", "Music", "War"];
+const CATALOG_STUDIO_FILTERS = ["A24", "Universal", "Warner Bros.", "Lionsgate", "Sony", "Paramount", "Disney", "Focus Features", "Neon", "Searchlight", "20th Century", "MGM", "Bleecker Street"];
 
 function FilmButton({ film, activeId, onSelect }: {
   film: SlateFilm;
@@ -1495,7 +1508,7 @@ function SlateSidebar({
                         onClick={() => setCustomGenres((prev) =>
                           prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
                         )}
-                        className={`text-[9px] px-1.5 py-0.5 rounded transition-all ${
+                        className={`text-[10px] px-2 py-1 rounded transition-all ${
                           on ? "bg-white text-black font-medium" : "bg-white/[0.05] text-neutral-500 hover:text-neutral-300"
                         }`}
                       >
@@ -1539,7 +1552,7 @@ function SlateSidebar({
               <div className="flex flex-wrap gap-1">
                 <button
                   onClick={() => setStudioFilter(null)}
-                  className={`text-[9px] px-1.5 py-0.5 rounded transition-all ${
+                  className={`text-[10px] px-2 py-1 rounded transition-all ${
                     !studioFilter ? "bg-white text-black font-medium" : "bg-white/[0.05] text-neutral-500 hover:text-neutral-300"
                   }`}
                 >
@@ -1549,7 +1562,7 @@ function SlateSidebar({
                   <button
                     key={s}
                     onClick={() => setStudioFilter(studioFilter === s ? null : s)}
-                    className={`text-[9px] px-1.5 py-0.5 rounded transition-all ${
+                    className={`text-[10px] px-2 py-1 rounded transition-all ${
                       studioFilter === s ? "bg-white text-black font-medium" : "bg-white/[0.05] text-neutral-500 hover:text-neutral-300"
                     }`}
                   >
@@ -1564,7 +1577,7 @@ function SlateSidebar({
               <div className="flex flex-wrap gap-1">
                 <button
                   onClick={() => setGenreFilter(null)}
-                  className={`text-[9px] px-1.5 py-0.5 rounded transition-all ${
+                  className={`text-[10px] px-2 py-1 rounded transition-all ${
                     !genreFilter ? "bg-white text-black font-medium" : "bg-white/[0.05] text-neutral-500 hover:text-neutral-300"
                   }`}
                 >
@@ -1574,7 +1587,7 @@ function SlateSidebar({
                   <button
                     key={g}
                     onClick={() => setGenreFilter(genreFilter === g ? null : g)}
-                    className={`text-[9px] px-1.5 py-0.5 rounded transition-all ${
+                    className={`text-[10px] px-2 py-1 rounded transition-all ${
                       genreFilter === g ? "bg-white text-black font-medium" : "bg-white/[0.05] text-neutral-500 hover:text-neutral-300"
                     }`}
                   >
@@ -1768,7 +1781,7 @@ export function SimulatePage() {
   return (
     <div className="flex h-screen bg-[#0a0a0a] text-white overflow-hidden">
 
-      <aside className="w-48 shrink-0 border-r border-white/[0.06] overflow-hidden">
+      <aside className="w-56 shrink-0 border-r border-white/[0.06] overflow-hidden">
         <SlateSidebar
           films={slateFilms}
           catalogFilms={catalogFilms}
@@ -1870,7 +1883,7 @@ export function SimulatePage() {
                   {windowData.isProjection && (
                     <div className="px-5 py-2 bg-white/[0.01] border-b border-white/[0.03]">
                       <p className="text-[10px] text-neutral-700 italic">
-                        2026 is projected — competition scored against 2025 theatrical data as a structural analog.
+                        2026: structural baseline from 2025 + <span className="text-purple-400">●</span> <span className="text-purple-400/80">announced wide releases (The Numbers)</span> merged on their actual dates with modeled holdovers.
                       </p>
                     </div>
                   )}

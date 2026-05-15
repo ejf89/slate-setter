@@ -18,7 +18,7 @@ A theatrical release planning tool. Scrapes Box Office Mojo for the past decade 
 
 **Downloadable PDF report.** Generates a polished multi-section release brief: AI forecast, primary/compare window breakdowns with full threat + holdover lists, year's top low-competition windows, genre comparables, and a methodology footer. The artifact a theatrical lead actually sends.
 
-**2026 is projected, 2023–2025 are exact.** Use the year selector to browse historical competitive landscapes or jump to 2026, which uses 2025 as a structural proxy (same seasonal rhythm, same holiday pattern). Real announced 2026 wide releases from competitors (via The Numbers) is a known next step.
+**2026 = 2025 baseline + real announced releases.** The 2025 competitive landscape supplies the structural baseline (typical seasonal patterns, market sizes, holdovers from smaller films). Layered on top, the actual **announced 2026 wide releases from The Numbers** — 221 titles from 21 tracked studios — get injected onto their announced dates with multi-week holdover decay modeled. So when you analyze, say, a horror film on June 12 2026, you see both the structural picture *and* the specific known competitors (Universal blockbuster X opening that day, Disney's tentpole still in its W3 holdover, etc.). Films from The Numbers are marked with a purple ● badge so you can tell what's real-announced vs. structural-proxy.
 
 ## The scoring algorithm
 
@@ -55,6 +55,19 @@ Coverage: 2015–2025, 537 weekends, ~2,000 unique films.
 ### TMDB (genre enrichment)
 
 `scripts/enrich.ts` calls the TMDB API to attach genre metadata to each film in the database. Genres are stored as a JSON array on each `films` row (e.g. `["Horror","Thriller"]`). Requires a `TMDB_API_KEY` env variable — get one free at [themoviedb.org](https://www.themoviedb.org/settings/api).
+
+### The Numbers (announced wide releases)
+
+`scripts/scrape-numbers.ts` fetches [the-numbers.com/movies/release-schedule](https://www.the-numbers.com/movies/release-schedule), parses out wide releases from the 21 tracked studios, and writes `data/upcoming-numbers.json` (date + title + studio per release).
+
+`scripts/enrich-numbers-genres.ts` then sends every title to Claude in one batch call to infer genres, and writes `data/upcoming-numbers-enriched.json` with per-studio opening gross estimates added.
+
+At runtime, when scoring a 2026 window, the API loads the enriched JSON and **merges each announced release into the closest 2025 baseline weekend** (within ±7 days), then propagates 6 weeks of holdover decay (100% / 50% / 30% / 18% / 11% / 7%). The merged films are flagged `isAnnounced`, so the UI can render them with a purple ● to distinguish from structural-proxy films.
+
+Re-run when the schedule changes:
+```bash
+ANTHROPIC_API_KEY=... npm run scrape-numbers && npm run enrich-numbers
+```
 
 ### Hardcoded genre map (`src/lib/genreMap.ts`)
 

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "seed": "npx tsx scripts/seed.ts",
-    "enrich": "npx tsx scripts/enrich.ts"
+    "enrich": "npx tsx scripts/enrich.ts",
+    "scrape-numbers": "npx tsx scripts/scrape-numbers.ts",
+    "enrich-numbers": "npx tsx scripts/enrich-numbers-genres.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",
