@@ -75,6 +75,21 @@ function splitThreats(films: FilmEntry[]) {
   };
 }
 
+function getHolidayLabel(date: string): string | null {
+  const d = new Date(date + "T12:00:00Z");
+  const m = d.getUTCMonth() + 1;
+  const day = d.getUTCDate();
+  if ((m === 12 && day >= 19) || (m === 1 && day <= 5)) return "Holiday";
+  if (m === 11 && day >= 20 && day <= 30)               return "Thanksgiving";
+  if (m === 5  && day >= 22 && day <= 27)               return "Memorial Day";
+  if (m === 7  && day >= 1  && day <= 7)                return "July 4th";
+  if ((m === 8 && day >= 28) || (m === 9 && day <= 4))  return "Labor Day";
+  if (m === 2  && day >= 10 && day <= 14)               return "Valentine's";
+  if (m === 2  && day >= 15 && day <= 21)               return "Presidents' Day";
+  if (m === 1  && day >= 13 && day <= 21)               return "MLK Weekend";
+  return null;
+}
+
 function ratingClass(r: "HIGH" | "MEDIUM" | "LOW") {
   return r === "HIGH" ? "text-red-400" : r === "MEDIUM" ? "text-amber-400" : "text-emerald-400";
 }
@@ -247,6 +262,7 @@ function BestWindowsStrip({
           const active = w.date === primaryDate;
           const threatCount = w.films.filter((f) => f.isThreat).length;
           const topThreat = w.films.filter((f) => f.isThreat).sort((a, b) => b.threatScore - a.threatScore)[0];
+          const holiday = getHolidayLabel(w.date);
           return (
             <button
               key={w.date}
@@ -261,6 +277,9 @@ function BestWindowsStrip({
               <div className="font-[family-name:var(--font-newsreader)] text-white text-lg leading-none mb-1">
                 {month} {day}
               </div>
+              {holiday && (
+                <div className="text-[8px] text-amber-400/70 mb-1">{holiday}</div>
+              )}
               <div className={`text-base font-bold leading-none mb-1 ${ratingClass(w.rating)}`}>
                 {(w.competitionScore * 100).toFixed(0)}%
               </div>
@@ -304,6 +323,7 @@ function WeekendRow({
   const { month, day } = parseDate(weekend.date);
   const color = bandColor(weekend.competitionScore);
   const { threats, others } = splitThreats(weekend.films);
+  const holiday = getHolidayLabel(weekend.date);
 
   const rowBg = isPrimary
     ? "bg-white/[0.04]"
@@ -332,6 +352,9 @@ function WeekendRow({
           <div className="font-[family-name:var(--font-newsreader)] text-white text-sm leading-tight">
             {month} {day}
           </div>
+          {holiday && (
+            <div className="text-[8px] text-amber-400/70 leading-none mt-0.5 truncate">{holiday}</div>
+          )}
         </div>
 
         {/* Competition bar + score */}
@@ -408,15 +431,21 @@ function WeekendRow({
 function WeekendBreakdown({
   weekend,
   isProjection,
+  avgWeekendGross,
   onClear,
 }: {
   weekend: Weekend;
   isProjection?: boolean;
+  avgWeekendGross?: number;
   onClear?: () => void;
 }) {
   const { month, day, year } = parseDate(weekend.date);
   const { threats, others } = splitThreats(weekend.films);
   const proxyYear = isProjection ? parseInt(weekend.date.slice(0, 4)) : null;
+  const holiday = getHolidayLabel(weekend.date);
+  const marketMultiple = avgWeekendGross && avgWeekendGross > 0
+    ? weekend.totalGross / avgWeekendGross
+    : null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -426,8 +455,15 @@ function WeekendBreakdown({
             <div className="font-[family-name:var(--font-newsreader)] text-xl text-white font-normal leading-none">
               {month} {day}
             </div>
-            <div className="font-[family-name:var(--font-newsreader)] text-neutral-600 text-xs italic">
-              {year}
+            <div className="flex items-center gap-2 mt-0.5">
+              <div className="font-[family-name:var(--font-newsreader)] text-neutral-600 text-xs italic">
+                {year}
+              </div>
+              {holiday && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                  {holiday}
+                </span>
+              )}
             </div>
           </div>
           {onClear && (
@@ -443,6 +479,11 @@ function WeekendBreakdown({
         <div className="mt-1.5 flex items-center gap-2 text-xs">
           <span className="text-neutral-600">market</span>
           <span className="text-white font-medium">{formatM(weekend.totalGross)}</span>
+          {marketMultiple !== null && (
+            <span className={`text-[9px] font-mono ${marketMultiple >= 1.4 ? "text-amber-400" : marketMultiple <= 0.7 ? "text-neutral-600" : "text-neutral-500"}`}>
+              {marketMultiple.toFixed(1)}× avg
+            </span>
+          )}
           <span className="text-neutral-700">·</span>
           <span className="text-emerald-400 font-medium">
             {formatM(weekend.totalGross * (1 - weekend.competitionScore))}
@@ -549,7 +590,12 @@ function ComparisonInsight({ primary, compare }: { primary: Weekend; compare: We
   const grossDiffPct = Math.abs(primary.totalGross - compare.totalGross) / Math.max(primary.totalGross, compare.totalGross, 1) * 100;
   const biggerMarket = primary.totalGross >= compare.totalGross ? `${pMonth} ${pDay}` : `${cMonth} ${cDay}`;
 
+  const pHoliday = getHolidayLabel(primary.date);
+  const cHoliday = getHolidayLabel(compare.date);
+
   const reasons: string[] = [];
+  if (pHoliday) reasons.push(`${pMonth} ${pDay} is the ${pHoliday} frame`);
+  if (cHoliday) reasons.push(`${cMonth} ${cDay} is the ${cHoliday} frame`);
   if (!isEquivalent) {
     if (winThreats.length === 0 && loseThreats.length > 0) {
       reasons.push(`No genre threats vs ${loseThreats.length} on the other date`);
@@ -638,6 +684,7 @@ function PanelSlot({
   emptyHeading,
   emptySub,
   isProjection,
+  avgWeekendGross,
   onClear,
 }: {
   weekend: Weekend | null;
@@ -646,6 +693,7 @@ function PanelSlot({
   emptyHeading: string;
   emptySub: string;
   isProjection?: boolean;
+  avgWeekendGross?: number;
   onClear?: () => void;
 }) {
   return (
@@ -656,7 +704,7 @@ function PanelSlot({
         </span>
       </div>
       {weekend ? (
-        <WeekendBreakdown weekend={weekend} isProjection={isProjection} onClear={onClear} />
+        <WeekendBreakdown weekend={weekend} isProjection={isProjection} avgWeekendGross={avgWeekendGross} onClear={onClear} />
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="font-[family-name:var(--font-newsreader)] text-neutral-700 text-base italic mb-1">
@@ -674,6 +722,7 @@ function DetailPanel({
   compare,
   activeFilm,
   isProjection,
+  avgWeekendGross,
   onClearPrimary,
   onClearCompare,
 }: {
@@ -681,6 +730,7 @@ function DetailPanel({
   compare: Weekend | null;
   activeFilm: SlateFilm | null;
   isProjection?: boolean;
+  avgWeekendGross?: number;
   onClearPrimary: () => void;
   onClearCompare: () => void;
 }) {
@@ -701,6 +751,7 @@ function DetailPanel({
           emptyHeading={emptyPrimary.heading}
           emptySub={emptyPrimary.sub}
           isProjection={isProjection}
+          avgWeekendGross={avgWeekendGross}
           onClear={primary ? onClearPrimary : undefined}
         />
         <div className="w-px bg-white/[0.06] shrink-0" />
@@ -711,6 +762,7 @@ function DetailPanel({
           emptyHeading="Click vs"
           emptySub="on any row to compare"
           isProjection={isProjection}
+          avgWeekendGross={avgWeekendGross}
           onClear={compare ? onClearCompare : undefined}
         />
       </div>
@@ -1031,6 +1083,9 @@ export function SimulatePage() {
   const primaryWeekend = weekends.find((w) => w.date === primaryDate) ?? null;
   const compareWeekend = weekends.find((w) => w.date === compareDate) ?? null;
   const lowCount = weekends.filter((w) => w.rating === "LOW").length;
+  const avgWeekendGross = weekends.length > 0
+    ? weekends.reduce((sum, w) => sum + w.totalGross, 0) / weekends.length
+    : 0;
 
   return (
     <div className="flex h-screen bg-[#0a0a0a] text-white overflow-hidden">
@@ -1199,6 +1254,7 @@ export function SimulatePage() {
           compare={compareWeekend}
           activeFilm={activeFilm}
           isProjection={windowData?.isProjection}
+          avgWeekendGross={avgWeekendGross}
           onClearPrimary={() => setPrimaryDate(null)}
           onClearCompare={() => setCompareDate(null)}
         />
