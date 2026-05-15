@@ -232,33 +232,47 @@ function BestWindowsStrip({
   if (top3.length === 0) return null;
 
   return (
-    <div className="px-5 py-2 border-b border-white/[0.04] shrink-0 flex items-center gap-3 flex-wrap">
-      <span className="text-[9px] text-neutral-700 uppercase tracking-widest font-semibold shrink-0">
+    <div className="px-5 pt-3 pb-3 border-b border-white/[0.04] shrink-0">
+      <div className="text-[9px] text-neutral-700 uppercase tracking-widest font-semibold mb-2.5">
         Best windows
-      </span>
-      {top3.map((w, i) => {
-        const { month, day } = parseDate(w.date);
-        const active = w.date === primaryDate;
-        return (
-          <button
-            key={w.date}
-            onClick={() => onSelect(w.date)}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-all ${
-              active
-                ? "bg-white text-black font-medium"
-                : "bg-white/[0.05] text-neutral-300 hover:bg-white/[0.08]"
-            }`}
-          >
-            <span className={`text-[9px] font-mono ${active ? "text-neutral-500" : "text-neutral-600"}`}>
-              #{i + 1}
-            </span>
-            <span className="font-[family-name:var(--font-newsreader)]">{month} {day}</span>
-            <span className={`text-[10px] font-semibold ${active ? "text-neutral-600" : ratingClass(w.rating)}`}>
-              {(w.competitionScore * 100).toFixed(0)}%
-            </span>
-          </button>
-        );
-      })}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {top3.map((w, i) => {
+          const { month, day } = parseDate(w.date);
+          const active = w.date === primaryDate;
+          const threatCount = w.films.filter((f) => f.isThreat).length;
+          const topThreat = w.films.filter((f) => f.isThreat).sort((a, b) => b.threatScore - a.threatScore)[0];
+          return (
+            <button
+              key={w.date}
+              onClick={() => onSelect(w.date)}
+              className={`text-left px-3 py-2.5 rounded-lg border transition-all ${
+                active
+                  ? "bg-white/[0.07] border-white/20"
+                  : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/10"
+              }`}
+            >
+              <div className="text-[8px] text-neutral-700 font-mono mb-1.5">#{i + 1}</div>
+              <div className="font-[family-name:var(--font-newsreader)] text-white text-lg leading-none mb-1">
+                {month} {day}
+              </div>
+              <div className={`text-base font-bold leading-none mb-1 ${ratingClass(w.rating)}`}>
+                {(w.competitionScore * 100).toFixed(0)}%
+              </div>
+              <div className="text-[10px] text-emerald-600 font-mono mb-1.5">
+                {formatM(w.totalGross * (1 - w.competitionScore))} uncontested
+              </div>
+              <div className="text-[9px] text-neutral-600 leading-snug">
+                {threatCount === 0
+                  ? "no direct threats"
+                  : topThreat
+                  ? <>{topThreat.title.length > 18 ? topThreat.title.slice(0, 17) + "…" : topThreat.title}</>
+                  : `${threatCount} threat${threatCount > 1 ? "s" : ""}`}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -297,14 +311,12 @@ function WeekendRow({
     ? "bg-sky-950/20"
     : "hover:bg-white/[0.02]";
 
-  const leftAccent = isPrimary
-    ? "border-l-2 border-white"
-    : isCompare
-    ? "border-l-2 border-sky-400"
-    : "border-l-2 border-transparent";
-
   return (
-    <div ref={rowRef} className={`flex items-stretch transition-colors ${rowBg} ${leftAccent}`}>
+    <div ref={rowRef} className={`flex items-stretch transition-colors ${rowBg}`}>
+      {/* Left accent indicator — always present, color changes by state */}
+      <div className={`w-0.5 self-stretch shrink-0 transition-colors ${
+        isPrimary ? "bg-white" : isCompare ? "bg-sky-400" : "bg-white/[0.06]"
+      }`} />
       {/* Row body — click to set as View */}
       <button
         onClick={onSelect}
@@ -370,17 +382,22 @@ function WeekendRow({
         </div>
       </button>
 
-      {/* "vs" compare button */}
+      {/* Compare button */}
       <button
         onClick={onCompare}
         title={isCompare ? "Remove from compare" : "Compare this weekend"}
-        className={`shrink-0 w-10 flex items-center justify-center border-l border-white/[0.04] font-medium transition-all ${
+        className={`shrink-0 w-16 flex flex-col items-center justify-center gap-0.5 border-l border-white/[0.04] transition-all ${
           isCompare
-            ? "bg-sky-950/30 text-sky-400 text-[11px]"
-            : "text-neutral-700 text-[10px] hover:text-sky-400 hover:bg-sky-950/10"
+            ? "bg-sky-950/40 text-sky-400"
+            : "text-neutral-600 hover:text-sky-400 hover:bg-sky-950/10"
         }`}
       >
-        vs
+        <span className="text-[9px] font-semibold tracking-wide uppercase">
+          {isCompare ? "vs" : "Compare"}
+        </span>
+        {isCompare && (
+          <span className="text-[8px] text-sky-600">remove</span>
+        )}
       </button>
     </div>
   );
@@ -429,12 +446,13 @@ function WeekendBreakdown({
         </div>
         <ScoreBadge weekend={weekend} />
         <div className="mt-1.5 flex items-center gap-2 text-xs">
+          <span className="text-neutral-600">market</span>
           <span className="text-white font-medium">{formatM(weekend.totalGross)}</span>
           <span className="text-neutral-700">·</span>
           <span className="text-emerald-400 font-medium">
             {formatM(weekend.totalGross * (1 - weekend.competitionScore))}
           </span>
-          <span className="text-neutral-700">opp.</span>
+          <span className="text-neutral-600">uncontested</span>
         </div>
       </div>
 
@@ -508,6 +526,116 @@ function WeekendBreakdown({
   );
 }
 
+// ─── Comparison insight ───────────────────────────────────────────────────────
+
+function ComparisonInsight({ primary, compare }: { primary: Weekend; compare: Weekend }) {
+  const pPct = primary.competitionScore * 100;
+  const cPct = compare.competitionScore * 100;
+  const { month: pMonth, day: pDay } = parseDate(primary.date);
+  const { month: cMonth, day: cDay } = parseDate(compare.date);
+
+  const ptsDiff = Math.abs(pPct - cPct);
+  const isEquivalent = ptsDiff < 3;
+
+  const primaryWins = primary.competitionScore <= compare.competitionScore;
+  const higher = primaryWins ? compare.competitionScore : primary.competitionScore;
+  const lower  = primaryWins ? primary.competitionScore : compare.competitionScore;
+  const relDiff = higher > 0.01 ? Math.round((higher - lower) / higher * 100) : 0;
+
+  const winnerLabel = primaryWins ? "View" : "Compare";
+  const winnerDate  = primaryWins ? `${pMonth} ${pDay}` : `${cMonth} ${cDay}`;
+  const winnerAccent = primaryWins ? "text-white" : "text-sky-400";
+
+  const pThreats = primary.films.filter((f) => f.isThreat).sort((a, b) => b.threatScore - a.threatScore);
+  const cThreats = compare.films.filter((f) => f.isThreat).sort((a, b) => b.threatScore - a.threatScore);
+  const winThreats = primaryWins ? pThreats : cThreats;
+  const loseThreats = primaryWins ? cThreats : pThreats;
+
+  const grossDiffPct = Math.abs(primary.totalGross - compare.totalGross) / Math.max(primary.totalGross, compare.totalGross, 1) * 100;
+  const biggerMarket = primary.totalGross >= compare.totalGross ? `${pMonth} ${pDay}` : `${cMonth} ${cDay}`;
+
+  const reasons: string[] = [];
+  if (!isEquivalent) {
+    if (winThreats.length === 0 && loseThreats.length > 0) {
+      reasons.push(`No genre threats vs ${loseThreats.length} on the other date`);
+    } else if (winThreats.length < loseThreats.length) {
+      reasons.push(`${winThreats.length} genre threat${winThreats.length !== 1 ? "s" : ""} vs ${loseThreats.length}`);
+    }
+    if (loseThreats[0]) {
+      const t = loseThreats[0];
+      const wk = t.weeksInRelease === 1 ? "opening" : `wk ${t.weeksInRelease}`;
+      reasons.push(`${t.title} (${t.genres[0] ?? "—"}, ${wk}) weighs heavily`);
+    }
+    if (grossDiffPct > 15) {
+      reasons.push(`${biggerMarket} is the larger market (${formatM(Math.max(primary.totalGross, compare.totalGross))} vs ${formatM(Math.min(primary.totalGross, compare.totalGross))})`);
+    }
+  }
+
+  return (
+    <div className="px-4 py-3 border-b border-white/[0.06] bg-white/[0.01] shrink-0">
+      {isEquivalent ? (
+        <p className="text-neutral-400 text-xs mb-2.5">
+          <span className="font-[family-name:var(--font-newsreader)] text-white">{pMonth} {pDay}</span>
+          {" "}and{" "}
+          <span className="font-[family-name:var(--font-newsreader)] text-white">{cMonth} {cDay}</span>
+          {" "}are roughly equivalent — {ptsDiff < 1 ? "identical" : `${Math.round(ptsDiff)}pt`} difference.
+        </p>
+      ) : (
+        <>
+          <p className="text-xs text-neutral-400 mb-1.5 leading-relaxed">
+            <span className={`font-[family-name:var(--font-newsreader)] font-medium ${winnerAccent}`}>{winnerDate}</span>
+            {" "}<span className={`text-[10px] font-semibold ${winnerAccent}`}>({winnerLabel})</span>
+            {" "}has{" "}
+            <span className="text-emerald-400 font-semibold">{relDiff}% less</span>
+            {" "}genre competition
+            <span className="text-neutral-600"> — {Math.round(ptsDiff)}pt difference</span>.
+          </p>
+          {reasons.length > 0 && (
+            <ul className="mb-2.5 space-y-0.5">
+              {reasons.map((r, i) => (
+                <li key={i} className="text-[11px] text-neutral-500 flex items-start gap-1.5">
+                  <span className="text-neutral-700 shrink-0 mt-px">·</span>
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+
+      {/* Side-by-side bars with labeled values */}
+      <div className="space-y-2">
+        {([
+          { label: `${pMonth} ${pDay}`, score: primary.competitionScore, rating: primary.rating, gross: primary.totalGross, isCompare: false },
+          { label: `${cMonth} ${cDay}`, score: compare.competitionScore, rating: compare.rating, gross: compare.totalGross, isCompare: true },
+        ] as const).map((row) => (
+          <div key={row.label}>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className={`text-[9px] w-11 shrink-0 ${row.isCompare ? "text-sky-600" : "text-neutral-500"}`}>
+                {row.label}
+              </span>
+              <div className="flex-1 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${Math.min(row.score * 100, 100)}%`, backgroundColor: bandColor(row.score) }}
+                />
+              </div>
+              <span className={`text-[10px] font-mono w-7 text-right shrink-0 ${ratingClass(row.rating)}`}>
+                {(row.score * 100).toFixed(0)}%
+              </span>
+            </div>
+            <div className="ml-[52px] flex items-center gap-1.5 text-[9px]">
+              <span className="text-neutral-600">market {formatM(row.gross)}</span>
+              <span className="text-neutral-800">·</span>
+              <span className="text-emerald-700">{formatM(row.gross * (1 - row.score))} uncontested</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PanelSlot({
   weekend,
   label,
@@ -566,26 +694,31 @@ function DetailPanel({
     : { heading: "Click any weekend", sub: "to view its breakdown" };
 
   return (
-    <div className="flex h-full overflow-hidden">
-      <PanelSlot
-        weekend={primary}
-        label="View"
-        accentClass="text-neutral-500"
-        emptyHeading={emptyPrimary.heading}
-        emptySub={emptyPrimary.sub}
-        isProjection={isProjection}
-        onClear={primary ? onClearPrimary : undefined}
-      />
-      <div className="w-px bg-white/[0.06] shrink-0" />
-      <PanelSlot
-        weekend={compare}
-        label="Compare"
-        accentClass="text-sky-600"
-        emptyHeading="Click vs"
-        emptySub="on any row to compare"
-        isProjection={isProjection}
-        onClear={compare ? onClearCompare : undefined}
-      />
+    <div className="flex flex-col h-full overflow-hidden">
+      {primary && compare && (
+        <ComparisonInsight primary={primary} compare={compare} />
+      )}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <PanelSlot
+          weekend={primary}
+          label="View"
+          accentClass="text-neutral-500"
+          emptyHeading={emptyPrimary.heading}
+          emptySub={emptyPrimary.sub}
+          isProjection={isProjection}
+          onClear={primary ? onClearPrimary : undefined}
+        />
+        <div className="w-px bg-white/[0.06] shrink-0" />
+        <PanelSlot
+          weekend={compare}
+          label="Compare"
+          accentClass="text-sky-600"
+          emptyHeading="Click vs"
+          emptySub="on any row to compare"
+          isProjection={isProjection}
+          onClear={compare ? onClearCompare : undefined}
+        />
+      </div>
     </div>
   );
 }
@@ -598,7 +731,6 @@ const GENRE_OPTIONS = [
   "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western",
 ];
 
-// Genres worth offering as catalog filters (the ones that actually appear in A24's catalog)
 const CATALOG_GENRE_FILTERS = ["Horror", "Drama", "Thriller", "Comedy", "Action", "Sci-Fi", "Romance", "War", "Documentary", "Fantasy"];
 
 function FilmButton({ film, activeId, onSelect }: {
@@ -777,7 +909,7 @@ function SlateSidebar({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search A24 films…"
+              placeholder="Search catalog…"
               className="w-full bg-white/[0.05] border border-white/[0.08] rounded px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-white/20"
             />
             <div className="flex flex-wrap gap-1">
@@ -837,10 +969,14 @@ export function SimulatePage() {
       .then((r) => r.json())
       .then(setSlateFilms)
       .catch(console.error);
-    fetch("/api/a24-catalog")
+    fetch("/api/catalog")
       .then((r) => r.json())
       .then(setCatalogFilms)
       .catch(console.error);
+    // Warm raw window cache for all years so first film selection is instant
+    for (const opt of WINDOW_OPTIONS) {
+      fetch(`/api/simulate/window?window=${opt.key}&genres=`).catch(() => {});
+    }
   }, []);
 
   useEffect(() => {

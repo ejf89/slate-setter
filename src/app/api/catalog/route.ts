@@ -5,7 +5,7 @@ import { getGenresForFilm } from "@/lib/genreMap";
 export const runtime = "nodejs";
 
 export function GET() {
-  const CACHE_KEY = "a24-catalog";
+  const CACHE_KEY = "catalog";
   const cached = getCached<object>(CACHE_KEY);
   if (cached) return NextResponse.json(cached);
 

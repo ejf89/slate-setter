@@ -1,7 +1,7 @@
 // Hardcoded genre map — fallback for films where DB genres are empty.
 // Keys are exact film titles from the `films` table.
 export const FILM_GENRE_MAP: Record<string, string[]> = {
-  // ── A24 catalog ────────────────────────────────────────────────────────
+  // ── Studio catalog ─────────────────────────────────────────────────────
   // 2025
   "Marty Supreme":           ["Drama", "Comedy"],
   "Eternity":                ["Drama"],
@@ -76,7 +76,7 @@ export const FILM_GENRE_MAP: Record<string, string[]> = {
   "Amy":                     ["Documentary"],
   "Ex Machina":              ["Sci-Fi", "Drama", "Thriller"],
   "While We're Young":       ["Comedy", "Drama"],
-  // ── A24 / arthouse horror ──────────────────────────────────────────────
+  // ── Arthouse horror ────────────────────────────────────────────────────
   "Hereditary": ["Horror", "Drama", "Thriller"],
   "Midsommar": ["Horror", "Drama", "Mystery"],
   "Talk to Me": ["Horror", "Thriller"],
