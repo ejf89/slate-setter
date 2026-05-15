@@ -1,4 +1,5 @@
 import type { FilmInTheater, CompetitorThreat, ThreatLevel } from "./types";
+import { getGenresForFilm } from "./genreMap";
 
 const ADJACENT_GENRES: [string, string][] = [
   ["Horror", "Thriller"],
@@ -25,11 +26,14 @@ export function genreOverlap(a: string[], b: string[]): number {
   return adjacent ? 0.6 : 0.15;
 }
 
-export function scoreWeekend(targetGenres: string[], films: FilmInTheater[]): number {
+type Scorable = Pick<FilmInTheater, "gross" | "weeksInRelease" | "genres"> & { title?: string };
+
+export function scoreWeekend(targetGenres: string[], films: Scorable[]): number {
   const totalGross = films.reduce((s, f) => s + f.gross, 0);
   if (totalGross === 0) return 0;
   return films.reduce((score, film) => {
-    const overlap = genreOverlap(targetGenres, film.genres);
+    const genres = film.title ? getGenresForFilm(film.title, film.genres) : film.genres;
+    const overlap = genreOverlap(targetGenres, genres);
     const holdoverDecay = 1 / (film.weeksInRelease || 1);
     const marketShare = film.gross / totalGross;
     return score + overlap * holdoverDecay * marketShare;
@@ -49,7 +53,8 @@ export function buildCompetitors(
   const totalGross = films.reduce((s, f) => s + f.gross, 0);
   return films
     .map((film) => {
-      const overlap = genreOverlap(targetGenres, film.genres);
+      const filmGenres = getGenresForFilm(film.title, film.genres);
+      const overlap = genreOverlap(targetGenres, filmGenres);
       const holdoverDecay = 1 / (film.weeksInRelease || 1);
       const contribution = overlap * holdoverDecay * (film.gross / (totalGross || 1));
       const threat: ThreatLevel = contribution >= 0.12 ? "HIGH" : contribution >= 0.05 ? "MEDIUM" : "LOW";
@@ -59,7 +64,7 @@ export function buildCompetitors(
       else if (overlap === 0.6) reason = `Adjacent genre · Week ${film.weeksInRelease}`;
       else reason = `Different audience · Week ${film.weeksInRelease}`;
 
-      return { title: film.title, genres: film.genres, gross: film.gross, weeksInRelease: film.weeksInRelease, threat, reason };
+      return { title: film.title, genres: filmGenres, gross: film.gross, weeksInRelease: film.weeksInRelease, threat, reason };
     })
     .filter((c) => c.threat !== "LOW" || films.length <= 5)
     .sort((a, b) => (a.threat === "HIGH" ? -1 : b.threat === "HIGH" ? 1 : 0));

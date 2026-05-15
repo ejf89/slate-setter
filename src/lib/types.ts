@@ -62,3 +62,11 @@ export interface AlternativeWeekend {
   rating: ThreatLevel;
   totalGross: number;
 }
+
+export interface RecommendedWeekend {
+  weekendDate: string;
+  totalGross: number;
+  competitionScore: number;
+  rating: ThreatLevel;
+  opportunityScore: number;
+}

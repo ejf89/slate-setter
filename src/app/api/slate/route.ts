@@ -1,36 +1,28 @@
 import { NextResponse } from "next/server";
-import Database from "better-sqlite3";
-import path from "path";
+import { getDb, getCached, setCached } from "@/lib/db";
 import type { SlateFilm } from "@/lib/types";
 
-const DB_PATH = path.join(process.cwd(), "data", "slate.db");
-
 export async function GET() {
-  const db = new Database(DB_PATH, { readonly: true });
+  const CACHE_KEY = "slate";
+  const cached = getCached<SlateFilm[]>(CACHE_KEY);
+  if (cached) return NextResponse.json(cached);
 
-  const rows = db
-    .prepare("SELECT * FROM slate_films ORDER BY status DESC, title ASC")
-    .all() as Array<{
-    id: number;
-    title: string;
-    genres: string;
-    director: string | null;
-    logline: string | null;
-    tentative_date: string | null;
-    status: string;
+  const db = getDb();
+  const rows = db.prepare(
+    `SELECT * FROM slate_films WHERE status != 'released'
+     ORDER BY CASE status WHEN 'confirmed' THEN 0 WHEN 'announced' THEN 1 ELSE 2 END,
+     tentative_date ASC NULLS LAST, title ASC`
+  ).all() as Array<{
+    id: number; title: string; genres: string; director: string | null;
+    logline: string | null; tentative_date: string | null; status: string;
   }>;
 
-  db.close();
-
   const data: SlateFilm[] = rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    genres: JSON.parse(r.genres || "[]"),
-    director: r.director,
-    logline: r.logline,
-    tentativeDate: r.tentative_date,
-    status: r.status,
+    id: r.id, title: r.title, genres: JSON.parse(r.genres || "[]"),
+    director: r.director, logline: r.logline,
+    tentativeDate: r.tentative_date, status: r.status,
   }));
 
+  setCached(CACHE_KEY, data);
   return NextResponse.json(data);
 }

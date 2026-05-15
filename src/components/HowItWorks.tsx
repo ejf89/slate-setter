@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,8 @@ export function HowItWorksModal({ open, onClose }: Props) {
             <h3 className="font-semibold text-white mb-1">1. Pick a film from your slate</h3>
             <p className="text-neutral-400">
               Select an upcoming film in the left panel. Its genres automatically load into
-              the competition analyzer.
+              the competition analyzer, and the right panel shows its best release windows
+              ranked by market opportunity.
             </p>
           </div>
 
@@ -38,26 +39,39 @@ export function HowItWorksModal({ open, onClose }: Props) {
             <h3 className="font-semibold text-white mb-1">2. Read the timeline</h3>
             <p className="text-neutral-400">
               Each bar is one weekend. Bar height = total industry gross. When a film is
-              active, bars recolor to show competition intensity — <span className="text-emerald-400">green</span> means
-              a clear weekend, <span className="text-red-400">red</span> means heavy genre competition.
+              active, bars recolor to show competition intensity —{" "}
+              <span className="text-emerald-400">green</span> means a clear weekend,{" "}
+              <span className="text-red-400">red</span> means heavy genre competition.
             </p>
           </div>
 
           <div>
-            <h3 className="font-semibold text-white mb-1">3. Click any weekend</h3>
+            <h3 className="font-semibold text-white mb-1">3. Click any weekend to explore</h3>
             <p className="text-neutral-400">
               The right panel shows every film in theaters that week, including holdovers
               (films in their 2nd, 3rd, 4th week). Holdovers still compete for audience — a
-              blockbuster in <span className="text-amber-400">W3</span> of its run still draws crowds.
+              blockbuster in <span className="text-amber-400">W3</span> of its run still draws
+              crowds.
             </p>
           </div>
 
           <div>
-            <h3 className="font-semibold text-white mb-1">4. Read the competition score</h3>
+            <h3 className="font-semibold text-white mb-1">4. Compare two dates side by side</h3>
+            <p className="text-neutral-400">
+              Any date in the recommendations list or the "Better Dates Nearby" section has a{" "}
+              <span className="text-neutral-200 font-medium">Compare</span> button. Click it
+              while viewing a primary date to open a split view — competition score, market
+              size, and top threats shown in parallel so you can weigh the trade-offs directly.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-white mb-1">5. Read the competition score</h3>
             <p className="text-neutral-400">
               Score combines genre overlap, holdover decay (W1 = full threat, W4 = 25%), and
               market share. Films in the same genre in their opening weekend are the highest
-              threat. Alternatives show nearby weekends with less competition.
+              threat. Opportunity % = market size × (1 − competition score), normalized to the
+              best available window.
             </p>
           </div>
 
@@ -74,8 +88,11 @@ export function HowItWorksBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-2.5 bg-amber-950/30 border-b border-amber-800/40 text-sm">
       <p className="text-amber-200/80">
-        <span className="font-medium">Get started:</span> Pick a film from your slate →
-        explore the timeline → click a weekend to analyze competition.
+        <span className="font-medium text-amber-300">Step 1:</span> Pick a film from your slate
+        <span className="mx-2 text-amber-700">—</span>
+        <span className="font-medium text-amber-300">Step 2:</span> See best release windows ranked by opportunity
+        <span className="mx-2 text-amber-700">—</span>
+        <span className="font-medium text-amber-300">Step 3:</span> Click a date to explore its competition
       </p>
       <button
         onClick={onDismiss}
