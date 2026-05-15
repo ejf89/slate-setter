@@ -1,7 +1,7 @@
 import type { ThreatLevel } from "./types";
 
-export const SCORE_HIGH = 0.35;
-export const SCORE_MEDIUM = 0.18;
+const SCORE_HIGH = 0.35;
+const SCORE_MEDIUM = 0.18;
 
 const ADJACENT_GENRES: [string, string][] = [
   ["Horror", "Thriller"],

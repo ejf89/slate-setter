@@ -8,22 +8,13 @@ import { genreOverlap, ratingFromScore } from "@/lib/competition";
 export const runtime = "nodejs";
 
 const WINDOWS: Record<string, { start: string; end: string; label: string; proxyYear?: number }> = {
-  "full-2022":   { start: "2022-01-01", end: "2022-12-31", label: "2022" },
-  "full-2023":   { start: "2023-01-01", end: "2023-12-31", label: "2023" },
-  "full-2024":   { start: "2024-01-01", end: "2024-12-31", label: "2024" },
-  "full-2025":   { start: "2025-01-01", end: "2025-12-31", label: "2025" },
-  "full-2026":   { start: "2025-01-01", end: "2025-12-31", label: "2026",        proxyYear: 2026 },
-  "spring-2025": { start: "2025-03-01", end: "2025-05-31", label: "Spring 2025" },
-  "summer-2025": { start: "2025-06-01", end: "2025-08-31", label: "Summer 2025" },
-  "fall-2025":   { start: "2025-08-29", end: "2025-12-31", label: "Fall 2025" },
-  "spring-2024": { start: "2024-03-01", end: "2024-05-31", label: "Spring 2024" },
-  "summer-2024": { start: "2024-06-01", end: "2024-08-31", label: "Summer 2024" },
-  "fall-2024":   { start: "2024-08-30", end: "2024-12-31", label: "Fall 2024" },
-  "spring-2026": { start: "2025-03-01", end: "2025-05-31", label: "Spring 2026", proxyYear: 2026 },
-  "summer-2026": { start: "2025-06-01", end: "2025-08-31", label: "Summer 2026", proxyYear: 2026 },
-  "fall-2026":   { start: "2025-08-29", end: "2025-12-31", label: "Fall 2026",   proxyYear: 2026 },
-  "holiday-2026":{ start: "2025-11-01", end: "2025-12-31", label: "Holiday 2026", proxyYear: 2026 },
+  "full-2023": { start: "2023-01-01", end: "2023-12-31", label: "2023" },
+  "full-2024": { start: "2024-01-01", end: "2024-12-31", label: "2024" },
+  "full-2025": { start: "2025-01-01", end: "2025-12-31", label: "2025" },
+  "full-2026": { start: "2025-01-01", end: "2025-12-31", label: "2026", proxyYear: 2026 },
 };
+
+const DEFAULT_WINDOW = "full-2026";
 
 function shiftDate(date: string, fromYear: number, toYear: number): string {
   return date.replace(`${fromYear}`, `${toYear}`);
@@ -149,7 +140,7 @@ function augmentWith2026Announcements(raw: RawWindowData): RawWindowData {
 }
 
 function loadRawWindow(windowSlug: string): RawWindowData | null {
-  const win = WINDOWS[windowSlug] ?? WINDOWS["fall-2026"];
+  const win = WINDOWS[windowSlug] ?? WINDOWS[DEFAULT_WINDOW];
   const rawKey = `raw:${windowSlug}`;
   const cached = getCached<RawWindowData>(rawKey);
   if (cached) return cached;
@@ -203,9 +194,9 @@ export function GET(req: NextRequest) {
   const url = new URL(req.url);
   const compsParam  = url.searchParams.get("comps")  ?? "";
   const genresParam = url.searchParams.get("genres") ?? "";
-  const windowSlug  = url.searchParams.get("window") ?? "fall-2026";
+  const windowSlug  = url.searchParams.get("window") ?? DEFAULT_WINDOW;
 
-  const win = WINDOWS[windowSlug] ?? WINDOWS["fall-2026"];
+  const win = WINDOWS[windowSlug] ?? WINDOWS[DEFAULT_WINDOW];
 
   const compIds = compsParam
     .split(",")

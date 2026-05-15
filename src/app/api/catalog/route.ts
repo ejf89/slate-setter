@@ -31,7 +31,7 @@ const TRACKED_STUDIOS: Record<string, string> = {
 };
 
 export function GET() {
-  const CACHE_KEY = "catalog-v3";
+  const CACHE_KEY = "catalog-v4";
   const cached = getCached<object>(CACHE_KEY);
   if (cached) return NextResponse.json(cached);
 
