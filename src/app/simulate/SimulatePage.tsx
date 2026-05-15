@@ -479,9 +479,9 @@ function WeekendBreakdown({
         <div className="mt-1.5 flex items-center gap-2 text-xs">
           <span className="text-neutral-600">market</span>
           <span className="text-white font-medium">{formatM(weekend.totalGross)}</span>
-          {marketMultiple !== null && (
-            <span className={`text-[9px] font-mono ${marketMultiple >= 1.4 ? "text-amber-400" : marketMultiple <= 0.7 ? "text-neutral-600" : "text-neutral-500"}`}>
-              {marketMultiple.toFixed(1)}× avg
+          {marketMultiple !== null && (marketMultiple >= 1.4 || marketMultiple <= 0.65) && (
+            <span className={`text-[9px] font-mono ${marketMultiple >= 1.4 ? "text-amber-400" : "text-neutral-600"}`}>
+              {marketMultiple >= 1.4 ? `${marketMultiple.toFixed(1)}× avg market` : "below-avg market"}
             </span>
           )}
           <span className="text-neutral-700">·</span>
