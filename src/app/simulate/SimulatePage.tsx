@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { SlateFilm } from "@/lib/types";
+import { SCORE_HIGH, SCORE_MEDIUM } from "@/lib/competition";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -62,9 +63,16 @@ function formatM(n: number) {
 
 function bandColor(score: number) {
   if (score >= 0.55) return "#ef4444";
-  if (score >= 0.35) return "#f97316";
-  if (score >= 0.18) return "#eab308";
+  if (score >= SCORE_HIGH) return "#f97316";
+  if (score >= SCORE_MEDIUM) return "#eab308";
   return "#22c55e";
+}
+
+function splitThreats(films: FilmEntry[]) {
+  return {
+    threats: films.filter((f) => f.isThreat).sort((a, b) => b.threatScore - a.threatScore),
+    others:  films.filter((f) => !f.isThreat).sort((a, b) => b.gross - a.gross),
+  };
 }
 
 function ratingClass(r: "HIGH" | "MEDIUM" | "LOW") {
@@ -128,15 +136,17 @@ function ScoreBadge({ weekend, size = "sm" }: { weekend: Weekend; size?: "sm" | 
         )
       : null;
 
+  const handleEnter = () => {
+    if (ref.current) {
+      const r = ref.current.getBoundingClientRect();
+      setPos({ x: r.left, y: r.top, h: r.height });
+    }
+  };
+
   if (size === "lg") {
     return (
       <>
-        <span
-          ref={ref}
-          className="inline-flex items-baseline gap-1.5 cursor-help"
-          onMouseEnter={() => { if (ref.current) { const r = ref.current.getBoundingClientRect(); setPos({ x: r.left, y: r.top, h: r.height }); } }}
-          onMouseLeave={() => setPos(null)}
-        >
+        <span ref={ref} className="inline-flex items-baseline gap-1.5 cursor-help" onMouseEnter={handleEnter} onMouseLeave={() => setPos(null)}>
           <span className={`text-2xl font-bold ${cls}`}>{pct}</span>
           <span className={`text-sm font-medium ${cls}`}>{label}</span>
           <span className="text-neutral-600 text-xs underline decoration-dotted">competition (?)</span>
@@ -147,12 +157,7 @@ function ScoreBadge({ weekend, size = "sm" }: { weekend: Weekend; size?: "sm" | 
   }
   return (
     <>
-      <span
-        ref={ref}
-        className="inline-flex items-baseline gap-1 cursor-help"
-        onMouseEnter={() => { if (ref.current) { const r = ref.current.getBoundingClientRect(); setPos({ x: r.left, y: r.top, h: r.height }); } }}
-        onMouseLeave={() => setPos(null)}
-      >
+      <span ref={ref} className="inline-flex items-baseline gap-1 cursor-help" onMouseEnter={handleEnter} onMouseLeave={() => setPos(null)}>
         <span className={`text-xs font-semibold ${cls}`}>{label} {pct}</span>
         <span className="text-neutral-700 text-[9px]">(?)</span>
       </span>
@@ -298,12 +303,7 @@ function WeekendRow({
 }) {
   const { month, day } = parseDate(weekend.date);
   const color = bandColor(weekend.competitionScore);
-  const threats = weekend.films
-    .filter((f) => f.isThreat)
-    .sort((a, b) => b.threatScore - a.threatScore);
-  const others = weekend.films
-    .filter((f) => !f.isThreat)
-    .sort((a, b) => b.gross - a.gross);
+  const { threats, others } = splitThreats(weekend.films);
 
   const rowBg = isPrimary
     ? "bg-white/[0.04]"
@@ -415,12 +415,7 @@ function WeekendBreakdown({
   onClear?: () => void;
 }) {
   const { month, day, year } = parseDate(weekend.date);
-  const threats = weekend.films
-    .filter((f) => f.isThreat)
-    .sort((a, b) => b.threatScore - a.threatScore);
-  const others = weekend.films
-    .filter((f) => !f.isThreat)
-    .sort((a, b) => b.gross - a.gross);
+  const { threats, others } = splitThreats(weekend.films);
   const proxyYear = isProjection ? parseInt(weekend.date.slice(0, 4)) : null;
 
   return (

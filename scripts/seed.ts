@@ -191,12 +191,13 @@ async function fetchTmdbGenres(title: string): Promise<{ genres: string[]; tmdbI
 // ── Slate data ────────────────────────────────────────────────────────────────
 
 const SLATE_FILMS = [
-  { title: "Eddington", genres: ["Western", "Thriller"], director: "Ari Aster", logline: "A small-town sheriff navigates escalating tensions during a pandemic-era summer.", tentative_date: null, status: "announced" },
-  { title: "Materialists", genres: ["Romance", "Drama", "Comedy"], director: "Celine Song", logline: "A high-end matchmaker balances desire and practicality when she reconnects with her ex.", tentative_date: "2025-06-13", status: "confirmed" },
-  { title: "Bring Her Back", genres: ["Horror"], director: "Danny Philippou, Michael Philippou", logline: "From the directors of Talk to Me — a new horror from A24.", tentative_date: "2025-05-23", status: "confirmed" },
-  { title: "Mother Mary", genres: ["Drama", "Music"], director: "David Lowery", logline: "Anne Hathaway stars in an intimate drama about fame and devotion.", tentative_date: null, status: "announced" },
-  { title: "Death of a Unicorn", genres: ["Horror", "Comedy"], director: "Alex Scharfman", logline: "A father and daughter accidentally hit a unicorn on the way to a retreat, unleashing chaos.", tentative_date: "2025-03-28", status: "released" },
-  { title: "Warfare", genres: ["War", "Drama", "Action"], director: "Alex Garland, Ray Mendoza", logline: "A visceral real-time account of a Navy SEAL platoon's harrowing rescue mission.", tentative_date: "2025-04-11", status: "released" },
+  { title: "The Backrooms", genres: ["Horror", "Sci-Fi"], director: "Kane Parsons", logline: "A found-footage horror built on the viral internet urban legend of infinite liminal spaces.", tentative_date: "2026-05-29", status: "confirmed" },
+  { title: "The Death of Robin Hood", genres: ["Action", "Drama"], director: "Michael Sarnoski", logline: "An aging Robin Hood reckons with his violent legacy — Hugh Jackman stars.", tentative_date: "2026-06-26", status: "confirmed" },
+  { title: "The Invite", genres: ["Comedy", "Romance"], director: "Olivia Wilde", logline: "A married couple meets their swinging neighbors at a dinner party that spirals out of control.", tentative_date: "2026-06-01", status: "announced" },
+  { title: "Tony", genres: ["Drama", "Biography"], director: "Matt Johnson", logline: "A biopic of the late Anthony Bourdain — Dominic Sessa stars as the culinary icon.", tentative_date: null, status: "announced" },
+  { title: "The Moment", genres: ["Comedy", "Music"], director: "Aidan Zamiri", logline: "Charli XCX plays a fictionalized version of herself on her debut arena tour — a meta comedy.", tentative_date: null, status: "announced" },
+  { title: "The Entertainment System Is Down", genres: ["Comedy", "Drama"], director: "Ruben Östlund", logline: "On a long-haul flight with no entertainment, passengers unravel — Keanu Reeves leads an all-star cast.", tentative_date: null, status: "unscheduled" },
+  { title: "Ronnie Spector Biopic", genres: ["Drama", "Music"], director: "Barry Jenkins", logline: "Zendaya portrays The Ronettes' Ronnie Spector in a long-gestating Barry Jenkins musical biopic.", tentative_date: null, status: "unscheduled" },
 ];
 
 // ── Main ──────────────────────────────────────────────────────────────────────
