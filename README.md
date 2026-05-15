@@ -1,18 +1,24 @@
 # Slate Setter
 
-A theatrical release planning tool. Analyzes three years of domestic box office history to score every weekend by how much genre-matched competition a film would face — so the team can find the best opening date and understand the trade-offs between any two windows.
+A theatrical release planning tool. Scrapes Box Office Mojo for the past decade of weekly grosses, scores every weekend by how much genre-matched competition a film would face (including holdovers), and turns that data into a strategic brief — including an AI-generated opening-weekend forecast and downloadable PDF report.
 
 ## What it does
 
-**Pick a film, see the competitive landscape for an entire year.** Each weekend gets a competition score based on what films are in theaters, how closely they overlap your genres, how deep into their run they are, and how much of the box office they control.
+**Pick a film, see the competitive landscape for an entire year.** Each weekend gets a competition score based on what films are in theaters (including holdovers from prior weeks), how closely they overlap your genres, how deep into their run they are, and how much of the box office they control. A smooth color gradient lets you eyeball intensity at a glance.
 
-**Compare two windows head-to-head.** Click any row to pin it as your "View" window, then hit **vs** on another to compare. A summary banner tells you which date is better, by how much, and why — which threats are driving the score, whether the market size differs, and the relative percentage difference.
+**Multi-year stacked heat map.** Four years (2023–2026) shown side-by-side as horizontal strips so you can spot seasonal patterns across years instantly. Click any year on the left to switch the detail view.
 
-**Best windows surface automatically.** The three lowest-competition weekends are pulled to the top as recommendation cards showing the date, score, and top competing title (or "no direct threats").
+**Compare two windows head-to-head.** Click any row to pin it as your "View" window, then hit **vs** on another to compare. A summary banner tells you which date is better, by how much, and why — which threats are driving the score, whether the market size differs, and the relative percentage difference. Holiday frames (July 4th, Thanksgiving, etc.) are surfaced as context.
 
-**The studio catalog as a reference set.** Beyond the upcoming slate, every historical film in the database with genre data is browsable in the Catalog tab — searchable and filterable by genre. Select any title to run it through the same scoring.
+**Best windows surface automatically.** The three lowest-competition weekends are pulled to the top as recommendation cards showing the date, holiday context, competition %, top competing title, and uncontested market dollars.
 
-**2026 is projected, 2023–2025 are exact.** Use the year selector to browse historical competitive landscapes or jump to 2026, which uses 2025 as a structural proxy (same seasonal rhythm, same holiday pattern).
+**AI strategic brief.** Once you've picked a window, click **Analyze with AI** to get a structured release brief from Claude: an opening weekend forecast range anchored on real comp grosses, the reasoning behind it, top three risks naming specific competitors, and a recommended release play (wide / platform / limited). A "What Claude saw" disclosure shows the exact data sent so the user can verify it's grounded.
+
+**Multi-studio catalog as a reference set.** Browse historical wide releases from 21 tracked studios (A24, Universal, Disney, Warner Bros., Paramount, Sony, MGM, Lionsgate, 20th Century, Neon, Focus, Searchlight, Angel, Vertical, Bleecker Street, Magnolia, Ketchup, Black Bear, Icon). Filter by studio or genre, search by title. Selecting any film runs it through the same scoring.
+
+**Downloadable PDF report.** Generates a polished multi-section release brief: AI forecast, primary/compare window breakdowns with full threat + holdover lists, year's top low-competition windows, genre comparables, and a methodology footer. The artifact a theatrical lead actually sends.
+
+**2026 is projected, 2023–2025 are exact.** Use the year selector to browse historical competitive landscapes or jump to 2026, which uses 2025 as a structural proxy (same seasonal rhythm, same holiday pattern). Real announced 2026 wide releases from competitors (via The Numbers) is a known next step.
 
 ## The scoring algorithm
 

@@ -8,4 +8,5 @@ export interface SlateFilm {
   logline: string | null;
   tentativeDate: string | null;
   status: string;
+  studio?: string;
 }
